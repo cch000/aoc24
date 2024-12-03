@@ -5,36 +5,42 @@ fn main() {
     let mut a_counter = 0;
     let mut b_counter = 0;
 
-    for l in input.lines() {
-        let digits: Vec<i32> = l
+    for line in input.lines() {
+        let report: Vec<i32> = line
             .split_whitespace()
-            .filter(|str| str.parse::<i32>().is_ok())
-            .map(|d| d.parse::<i32>().unwrap())
+            .filter_map(|d| d.parse::<i32>().ok())
             .collect();
 
-        if safe(&digits) {
+        if safe(&report) {
             a_counter += 1;
         }
 
-        if permissive_safe(&digits) {
+        if permissive_safe(&report) {
             b_counter += 1;
         }
     }
-
     println!("part a: {}", a_counter);
     println!("part b: {}", b_counter);
 }
 
-fn permissive_safe(digits: &Vec<i32>) -> bool {
-    if safe(digits) {
+fn safe(report: &[i32]) -> bool {
+    let init_sign = (report[0] - report[1]).signum();
+
+    report
+        .iter()
+        .zip(report.iter().skip(1))
+        .map(|(current, next)| current - next)
+        .all(|diff| diff.abs() > 0 && diff.abs() < 4 && diff.signum() == init_sign)
+}
+
+fn permissive_safe(report: &[i32]) -> bool {
+    if safe(report) {
         true
     } else {
-        for i in 0..digits.len() {
-            let mut perm_digits = digits.clone();
+        for i in 0..report.len() {
+            let perm_report = [&report[0..i], &report[i + 1..report.len()]].concat();
 
-            perm_digits.remove(i);
-
-            if safe(&perm_digits) {
+            if safe(&perm_report) {
                 return true;
             }
         }
@@ -42,23 +48,11 @@ fn permissive_safe(digits: &Vec<i32>) -> bool {
     }
 }
 
-fn safe(digits: &[i32]) -> bool {
-    let init_sign = (digits[0] - digits[1]).signum();
-
-    let not_safe = digits
-        .iter()
-        .zip(digits.iter().skip(1))
-        .map(|(d, next)| d - next)
-        .any(|diff| diff.abs() == 0 || diff.abs() > 3 || diff.signum() != init_sign);
-
-    !not_safe
-}
-
 #[cfg(test)]
 mod test {
 
     //https://www.reddit.com/r/adventofcode/comments/1h4shdu/2024_day_2_part2_edge_case_finder/
-    const REPORT: &str = "48 46 47 49 51 54 56
+    const TEST: &str = "48 46 47 49 51 54 56
     1 1 2 3 4 5
     1 2 3 4 5 5
     5 1 2 3 4 5
@@ -72,14 +66,14 @@ mod test {
     #[test]
     fn test() {
         let mut counter = 0;
-        for l in REPORT.lines() {
-            let digits: Vec<i32> = l
+        for l in TEST.lines() {
+            let report: Vec<i32> = l
                 .split_whitespace()
                 .filter(|str| str.parse::<i32>().is_ok())
                 .map(|d| d.parse::<i32>().unwrap())
                 .collect();
 
-            if super::permissive_safe(&digits) {
+            if super::permissive_safe(&report) {
                 counter += 1;
             }
         }
