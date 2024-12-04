@@ -37,13 +37,32 @@ fn permissive_safe(report: &[i32]) -> bool {
     if safe(report) {
         true
     } else {
-        for i in 0..report.len() {
-            let perm_report = [&report[0..i], &report[i + 1..report.len()]].concat();
+        if safe(&report[1..report.len()]) {
+            return true;
+        }
 
-            if safe(&perm_report) {
+        let init_sign = (report[0] - report[1]).signum();
+
+        //starting index of the problematic comparison
+        //the problematic index is either i or i+1
+        let i = report
+            .iter()
+            .zip(report.iter().skip(1))
+            .map(|(current, next)| current - next)
+            .position(|diff| diff.abs() == 0 || diff.abs() > 3 || diff.signum() != init_sign);
+
+        if i.is_some() {
+            let i = i.unwrap();
+
+            if safe(&[&report[0..i], &report[i + 1..report.len()]].concat()) {
+                return true;
+            }
+
+            if safe(&[&report[0..i + 1], &report[i + 2..report.len()]].concat()) {
                 return true;
             }
         }
+
         false
     }
 }
