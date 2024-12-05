@@ -1,3 +1,3 @@
 Personal repository for AOC-24
 
-Total stars: 4
+Total stars: 6
