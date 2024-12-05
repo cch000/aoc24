@@ -10,7 +10,7 @@ fn main() {
 fn part_a(input: &str) -> i32 {
     Regex::new(r"mul\((\d+),(\d+)\)")
         .unwrap()
-        .captures_iter(&input)
+        .captures_iter(input)
         .map(|capture| {
             let (_, [x, y]) = capture.extract();
             x.parse::<i32>().unwrap() * y.parse::<i32>().unwrap()
@@ -23,7 +23,7 @@ fn part_b(input: &str) -> i32 {
 
     Regex::new(r"mul\((\d+),(\d+)\)|(do\(\))|(don't\(\))")
         .unwrap()
-        .captures_iter(&input)
+        .captures_iter(input)
         .filter_map(|capture| {
             capture.get(4).is_some().then(|| enabled = false);
             capture.get(3).is_some().then(|| enabled = true);
